@@ -568,8 +568,8 @@
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '') || 'renew-riders-post';
     const link = document.createElement('a');
-    link.download = base + '.png';
-    link.href = canvas.toDataURL('image/png');
+  link.download = base + '.jpg';
+  link.href = canvas.toDataURL('image/jpeg', 1.0);
     link.click();
   });
 
