@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Renew Riders — Instagram Post Maker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Anton&family=Aldrich&family=Poppins:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink: #14181B;
+    --ink-2: #1E262B;
+    --steel-line: #33414A;
+    --paper: #EFEAE0;
+    --paper-2: #E4DCCB;
+    --paper-line: #D8CFBB;
+    --rust: #B33D28;
+    --amber: #DE8A1E;
+    --cream: #F7F4EC;
+    --muted: #8B93966E;
+    --f-display: "Oswald", sans-serif;
+    --f-body: "Work Sans", sans-serif;
+    --f-mono: "IBM Plex Mono", monospace;
+  }
+  *,*::before,*::after{ box-sizing: border-box; }
+  body{
+    margin: 0;
+    background: var(--ink);
+    color: var(--cream);
+    font-family: var(--f-body);
+    line-height: 1.6;
+  }
+  .topbar{
+    padding: 1.4rem clamp(1.2rem, 4vw, 2.5rem);
+    border-bottom: 1px solid var(--steel-line);
+    display: flex;
+    align-items: baseline;
+    gap: .9rem;
+    flex-wrap: wrap;
+  }
+  .topbar h1{
+    font-family: var(--f-display);
+    font-size: 1.3rem;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+    margin: 0;
+  }
+  .topbar h1 span{ color: var(--amber); }
+  .topbar p{ margin: 0; font-size: .85rem; color: #B9C0C2; }
+
+  .layout{
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 0;
+    min-height: calc(100vh - 68px);
+  }
+  .panel{
+    padding: clamp(1.2rem, 3vw, 2rem);
+    border-right: 1px solid var(--steel-line);
+    overflow-y: auto;
+  }
+  .preview-pane{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(1.2rem, 3vw, 2.5rem);
+    background:
+      repeating-conic-gradient(#20272B 0% 25%, #171C1F 0% 50%) 50% / 24px 24px;
+  }
+
+  fieldset{
+    border: 0;
+    padding: 0;
+    margin: 0 0 1.6rem;
+  }
+  legend{
+    font-family: var(--f-mono);
+    font-size: .68rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: .8rem;
+    padding: 0;
+  }
+
+  .dropzone{
+    border: 1.5px dashed var(--steel-line);
+    border-radius: 8px;
+    padding: 1.6rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .18s ease, background .18s ease;
+    position: relative;
+  }
+  .dropzone:hover, .dropzone.is-drag{ border-color: var(--amber); background: rgba(222,138,30,0.06); }
+  .dropzone svg{ width: 28px; height: 28px; color: var(--amber); margin-bottom: .5rem; }
+  .dropzone p{ margin: 0; font-size: .85rem; color: #B9C0C2; }
+  .dropzone input[type=file]{
+    position: absolute; inset: 0; opacity: 0; cursor: pointer;
+  }
+  .dropzone.has-image p{ color: var(--cream); }
+
+  .field{ margin-bottom: 1rem; }
+  .field label{
+    display: block;
+    font-family: var(--f-mono);
+    font-size: .68rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #B9C0C2;
+    margin-bottom: .45rem;
+  }
+  .field input[type=text], .field select{
+    width: 100%;
+    padding: .7em .8em;
+    background: var(--ink-2);
+    border: 1px solid var(--steel-line);
+    border-radius: 5px;
+    color: var(--cream);
+    font-family: var(--f-body);
+    font-size: .92rem;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .field select{
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23B9C0C2' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right .7em center;
+    background-size: 15px;
+    padding-right: 2.2em;
+  }
+  .field input:focus, .field select:focus{ border-color: var(--amber); }
+  .field-row{ display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
+
+  .field input[type=color]{
+    width: 100%;
+    height: 42px;
+    padding: 4px;
+    background: var(--ink-2);
+    border: 1px solid var(--steel-line);
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .field input[type=color]::-webkit-color-swatch-wrapper{ padding: 0; }
+  .field input[type=color]::-webkit-color-swatch{ border: none; border-radius: 3px; }
+
+  .row-2{ display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
+
+  .checkbox-field{ display: flex; align-items: center; gap: .6rem; margin-bottom: 1.4rem; }
+  .checkbox-field input{ width: 16px; height: 16px; accent-color: var(--rust); }
+  .checkbox-field label{ font-size: .85rem; color: #B9C0C2; margin: 0; }
+
+  .btn{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .55em;
+    width: 100%;
+    padding: .95em 1.2em;
+    font-family: var(--f-display);
+    font-size: .88rem;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    font-weight: 500;
+    border-radius: 5px;
+    border: 1px solid transparent;
+    background: var(--rust);
+    color: var(--cream);
+    cursor: pointer;
+    transition: transform .18s ease, background .18s ease;
+  }
+  .btn:hover{ background: #932F1D; transform: translateY(-1px); }
+  .btn svg{ width: 1.1em; height: 1.1em; }
+  .btn[disabled]{ opacity: .45; cursor: not-allowed; transform: none; }
+
+  .preview-wrap{
+    position: relative;
+    max-width: 100%;
+  }
+  #canvas{
+    display: block;
+    max-width: 100%;
+    max-height: 82vh;
+    width: auto;
+    height: auto;
+    border-radius: 4px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.55);
+  }
+  .empty-state{
+    text-align: center;
+    color: #7C8588;
+    font-size: .9rem;
+    max-width: 22ch;
+  }
+
+  @media (max-width: 900px){
+    .layout{ grid-template-columns: 1fr; }
+    .panel{ border-right: none; border-bottom: 1px solid var(--steel-line); }
+    #canvas{ max-height: 60vh; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>RENEW<span>RIDERS</span> — Post Maker</h1>
+  <p>Upload a photo, fill in the details, download a ready-to-post image.</p>
+</div>
+
+<div class="layout">
+
+  <div class="panel">
+
+    <fieldset>
+      <legend>1 · Photo</legend>
+      <div class="dropzone" id="dropzone">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4M12 4l-4 4M12 4l4 4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <p id="dropzoneText">Tap to upload, or drag a photo here</p>
+        <input type="file" id="fileInput" accept="image/*">
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>2 · Format</legend>
+      <div class="field">
+        <label for="ratioSelect">Post shape</label>
+        <select id="ratioSelect">
+          <option value="portrait" selected>Portrait (4:5) — Feed</option>
+          <option value="square">Square (1:1) — Feed</option>
+          <option value="story">Story / Reel (9:16)</option>
+        </select>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>3 · Headline</legend>
+      <div class="field">
+        <label for="headingInput">Title</label>
+        <input type="text" id="headingInput" placeholder="e.g. E250 FOR SALE" value="">
+      </div>
+      <div class="field">
+        <label for="priceInput">Price (₹)</label>
+        <input type="text" id="priceInput" placeholder="e.g. 6,99,000" value="">
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>4 · Style</legend>
+      <div class="row-2">
+        <div class="field">
+          <label for="headlineFontSelect">Headline Font</label>
+          <select id="headlineFontSelect">
+            <option value="Anton" selected>Anton — Bold Poster</option>
+            <option value="Aldrich">Aldrich — Tech / Sporty</option>
+            <option value="Poppins">Poppins — Rounded Bold</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="alignSelect">Text Alignment</label>
+          <select id="alignSelect">
+            <option value="left" selected>Left</option>
+            <option value="center">Center</option>
+            <option value="right">Right</option>
+          </select>
+        </div>
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label for="headlineColor">Headline Colour</label>
+          <input type="color" id="headlineColor" value="#ffd23f">
+        </div>
+        <div class="field">
+          <label for="priceColor">Price Colour</label>
+          <input type="color" id="priceColor" value="#ffffff">
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>5 · Vehicle Details</legend>
+      <div class="row-2">
+        <div class="field">
+          <label for="yearInput">Model Year</label>
+          <input type="text" id="yearInput" placeholder="e.g. 2010">
+        </div>
+        <div class="field">
+          <label for="kmInput">KM Driven</label>
+          <input type="text" id="kmInput" placeholder="e.g. 1,25,000">
+        </div>
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label for="fuelSelect">Fuel Type</label>
+          <select id="fuelSelect">
+            <option value="">— None —</option>
+            <option>Petrol</option>
+            <option>Diesel</option>
+            <option>CNG</option>
+            <option>Electric</option>
+            <option>Hybrid</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="ownerSelect">Owner</label>
+          <select id="ownerSelect">
+            <option value="">— None —</option>
+            <option>1st Owner</option>
+            <option>2nd Owner</option>
+            <option>3rd Owner</option>
+            <option>4th Owner+</option>
+          </select>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>6 · Branding</legend>
+      <div class="checkbox-field">
+        <input type="checkbox" id="watermarkCheck" checked>
+        <label for="watermarkCheck">Add @renew_5582 watermark</label>
+      </div>
+    </fieldset>
+
+    <button class="btn" id="downloadBtn" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M12 15l-4-4M12 15l4-4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Download Image
+    </button>
+
+  </div>
+
+  <div class="preview-pane">
+    <div class="preview-wrap">
+      <canvas id="canvas" width="1080" height="1350"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+
+  const fileInput = document.getElementById('fileInput');
+  const dropzone = document.getElementById('dropzone');
+  const dropzoneText = document.getElementById('dropzoneText');
+  const ratioSelect = document.getElementById('ratioSelect');
+  const headingInput = document.getElementById('headingInput');
+  const priceInput = document.getElementById('priceInput');
+  const yearInput = document.getElementById('yearInput');
+  const kmInput = document.getElementById('kmInput');
+  const fuelSelect = document.getElementById('fuelSelect');
+  const ownerSelect = document.getElementById('ownerSelect');
+  const watermarkCheck = document.getElementById('watermarkCheck');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const headlineFontSelect = document.getElementById('headlineFontSelect');
+  const alignSelect = document.getElementById('alignSelect');
+  const headlineColor = document.getElementById('headlineColor');
+  const priceColor = document.getElementById('priceColor');
+
+  const SIZES = {
+    portrait: [1080, 1350],
+    square:   [1080, 1080],
+    story:    [1080, 1920]
+  };
+
+  const FUEL_EMOJI = {
+    Petrol: ' ⛽', Diesel: ' ⛽', CNG: ' ⛽', Electric: ' ⚡', Hybrid: ' ⚡'
+  };
+
+  let uploadedImage = null;
+  let fontsReady = false;
+
+  function fitFont(text, startSize, family, weight, maxWidth, minSize){
+    let size = startSize;
+    const fam = `${family}, sans-serif`;
+    ctx.font = `${weight ? weight + ' ' : ''}${size}px ${fam}`;
+    while (ctx.measureText(text).width > maxWidth && size > minSize) {
+      size -= 2;
+      ctx.font = `${weight ? weight + ' ' : ''}${size}px ${fam}`;
+    }
+    return size;
+  }
+
+  function draw(){
+    const [w, h] = SIZES[ratioSelect.value];
+    canvas.width = w;
+    canvas.height = h;
+
+    // Base fill
+    ctx.fillStyle = '#1B1F22';
+    ctx.fillRect(0, 0, w, h);
+
+    // Photo — cover-fit
+    if (uploadedImage) {
+      const imgRatio = uploadedImage.width / uploadedImage.height;
+      const canvasRatio = w / h;
+      let drawW, drawH, dx, dy;
+      if (imgRatio > canvasRatio) {
+        drawH = h;
+        drawW = h * imgRatio;
+        dx = (w - drawW) / 2;
+        dy = 0;
+      } else {
+        drawW = w;
+        drawH = w / imgRatio;
+        dx = 0;
+        dy = (h - drawH) / 2;
+      }
+      ctx.drawImage(uploadedImage, dx, dy, drawW, drawH);
+    } else {
+      ctx.fillStyle = '#7C8588';
+      ctx.font = '600 28px Poppins, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Upload a photo to begin', w/2, h/2);
+    }
+
+    const padX = w * 0.075;
+
+    // ---- Headline + price (top) ----
+    const heading = (headingInput.value || '').trim().toUpperCase();
+    const price = priceInput.value.trim();
+    const headFont = headlineFontSelect.value;
+    const align = alignSelect.value; // 'left' | 'center' | 'right'
+
+    let textX, textAlignVal;
+    if (align === 'center') { textAlignVal = 'center'; textX = w / 2; }
+    else if (align === 'right') { textAlignVal = 'right'; textX = w - padX; }
+    else { textAlignVal = 'left'; textX = padX; }
+
+    if (heading || price) {
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,0.55)';
+      ctx.shadowBlur = w * 0.012;
+      ctx.shadowOffsetX = w * 0.004;
+      ctx.shadowOffsetY = w * 0.004;
+      ctx.textAlign = textAlignVal;
+      ctx.textBaseline = 'alphabetic';
+
+      let cursorY = h * 0.13;
+
+      if (heading) {
+        const headSize = fitFont(heading, w * 0.11, headFont, headFont === 'Poppins' ? '800' : '', w - padX * 2, 24);
+        ctx.font = `${headFont === 'Poppins' ? '800 ' : ''}${headSize}px ${headFont}, sans-serif`;
+        ctx.fillStyle = headlineColor.value;
+        cursorY += headSize * 0.82;
+        ctx.fillText(heading, textX, cursorY);
+        cursorY += headSize * 0.22;
+      }
+
+      if (price) {
+        const priceText = '₹' + price;
+        const priceSize = fitFont(priceText, w * 0.1, 'Poppins', '900', w - padX * 2, 22);
+        ctx.font = `900 ${priceSize}px Poppins, sans-serif`;
+        ctx.fillStyle = priceColor.value;
+        cursorY += priceSize * 0.82;
+        ctx.fillText(priceText, textX, cursorY);
+      }
+
+      ctx.restore();
+    }
+
+    // ---- Bottom gradient + stats ----
+    const fuelVal = fuelSelect.value ? fuelSelect.value + (FUEL_EMOJI[fuelSelect.value] || '') : '';
+    const stats = [];
+    if (yearInput.value.trim()) stats.push(['MODEL', yearInput.value.trim()]);
+    if (kmInput.value.trim()) stats.push(['KM', kmInput.value.trim()]);
+    if (fuelVal) stats.push(['FUEL', fuelVal]);
+    if (ownerSelect.value) stats.push(['OWNER', ownerSelect.value]);
+
+    if (stats.length) {
+      const gradH = h * 0.24;
+      const grad = ctx.createLinearGradient(0, h - gradH, 0, h);
+      grad.addColorStop(0, 'rgba(10,12,13,0)');
+      grad.addColorStop(1, 'rgba(8,10,11,0.85)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, h - gradH, w, gradH);
+
+      const statY = h - h * 0.065;
+      const labelY = statY - h * 0.05;
+      const colW = w / stats.length;
+
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,0.6)';
+      ctx.shadowBlur = w * 0.01;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = w * 0.003;
+      ctx.textAlign = 'center';
+
+      stats.forEach((s, i) => {
+        const cx = colW * i + colW / 2;
+        ctx.font = `700 ${w * 0.022}px Poppins, sans-serif`;
+        ctx.fillStyle = 'rgba(255,255,255,0.82)';
+        ctx.fillText(s[0], cx, labelY);
+
+        const valSize = fitFont(s[1], w * 0.034, 'Poppins', '800', colW - w*0.03, 14);
+        ctx.font = `800 ${valSize}px Poppins, sans-serif`;
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText(s[1], cx, statY);
+      });
+
+      ctx.restore();
+    }
+
+    // ---- Watermark ----
+    if (watermarkCheck.checked) {
+      ctx.save();
+      ctx.textAlign = 'right';
+      ctx.font = `600 ${w * 0.02}px Poppins, sans-serif`;
+      ctx.fillStyle = 'rgba(255,255,255,0.72)';
+      ctx.shadowColor = 'rgba(0,0,0,0.5)';
+      ctx.shadowBlur = 6;
+      ctx.fillText('@renew_5582', w - w * 0.05, h * 0.045);
+      ctx.restore();
+    }
+
+    downloadBtn.disabled = !uploadedImage;
+  }
+
+  function loadImageFile(file){
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      const img = new Image();
+      img.onload = function(){
+        uploadedImage = img;
+        dropzone.classList.add('has-image');
+        dropzoneText.textContent = file.name + ' — tap to replace';
+        draw();
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  fileInput.addEventListener('change', function(e){
+    loadImageFile(e.target.files[0]);
+  });
+
+  ['dragover','dragenter'].forEach(evt => {
+    dropzone.addEventListener(evt, function(e){
+      e.preventDefault();
+      dropzone.classList.add('is-drag');
+    });
+  });
+  ['dragleave','dragend','drop'].forEach(evt => {
+    dropzone.addEventListener(evt, function(e){
+      dropzone.classList.remove('is-drag');
+    });
+  });
+  dropzone.addEventListener('drop', function(e){
+    e.preventDefault();
+    const file = e.dataTransfer.files && e.dataTransfer.files[0];
+    loadImageFile(file);
+  });
+
+  [ratioSelect, headingInput, priceInput, yearInput, kmInput, fuelSelect, ownerSelect, watermarkCheck, headlineFontSelect, alignSelect, headlineColor, priceColor].forEach(el => {
+    el.addEventListener('input', draw);
+    el.addEventListener('change', draw);
+  });
+
+  downloadBtn.addEventListener('click', function(){
+    const base = (headingInput.value || 'renew-riders-post')
+      .toLowerCase().trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '') || 'renew-riders-post';
+    const link = document.createElement('a');
+    link.download = base + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
+
+  // Wait for fonts before first draw so text doesn't fall back to system fonts
+  Promise.all([
+    document.fonts.load('900 40px Poppins'),
+    document.fonts.load('800 40px Poppins'),
+    document.fonts.load('700 40px Poppins'),
+    document.fonts.load('600 40px Poppins'),
+    document.fonts.load('40px Anton'),
+    document.fonts.load('40px Aldrich')
+  ]).then(function(){
+    fontsReady = true;
+    draw();
+  }).catch(draw);
+
+  document.fonts.ready.then(draw);
+  document.fonts.addEventListener('loadingdone', draw);
+  draw();
+})();
+</script>
+
+</body>
+</html>
